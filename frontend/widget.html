@@ -2,23 +2,34 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Meta de Suscriptores</title>
+  <title>Widget Meta de Subs</title>
   <style>
     body {
       margin: 0;
       background: transparent;
       font-family: Arial, sans-serif;
-      font-size: 48px;
       color: white;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+    }
+
+    #meta {
+      font-size: 3rem;
+    }
+
+    #progress {
+      font-size: 1.5rem;
+      margin-top: 0.5rem;
     }
   </style>
 </head>
 <body>
   <div id="meta">Cargando...</div>
+  <div id="progress"></div>
   <script src="widget.js"></script>
 </body>
 </html>
