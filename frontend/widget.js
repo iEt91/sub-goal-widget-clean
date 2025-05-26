@@ -4,7 +4,7 @@ const params = new URLSearchParams(window.location.search);
 const config = {
   clientId: params.get('clientId') || 'gp762nuuoqcoxypju8c569th9wz7q5',
   accessToken: params.get('accessToken') || '6s1g5z1old5ku6t6i0xg68e6gabmk8',
-  channelName: params.get('channelName') || 'tangov91',
+  channelName: params.get('channelName') || 'blackelespanolito',
   goalAmount: parseInt(params.get('goal')) || 100
 };
 

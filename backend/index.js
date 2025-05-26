@@ -74,7 +74,7 @@ app.get('/subscribers', async (req, res) => {
   try {
     const clientId = req.query.clientId || process.env.TWITCH_CLIENT_ID;
     const token = req.query.accessToken || process.env.TWITCH_TOKEN;
-    const channelName = req.query.channelName || 'tangov91';
+    const channelName = req.query.channelName || 'blackelespanolito';
 
     // Obtener Channel ID
     const userResponse = await axios.get(`https://api.twitch.tv/helix/users?login=${channelName}`, {
