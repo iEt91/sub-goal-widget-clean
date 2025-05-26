@@ -16,7 +16,7 @@ async function fetchSubscribers() {
     const current = data.total;
     const target = config.goalAmount;
 
-    metaDiv.textContent = `Meta: ${current} / ${target}`;
+    metaDiv.textContent = `Subs: ${current} / ${target}`;
   } catch (err) {
     metaDiv.textContent = 'Error al cargar subs';
     console.error('Error al cargar subs:', err);
