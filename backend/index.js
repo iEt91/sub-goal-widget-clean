@@ -30,7 +30,7 @@ function sendCurrentState(ws) {
   ws.send(raw);
 }
 
-// Actualización periódica de suscriptores
+// Actualización periódica de subs (opcional si usás /subscribers directo)
 async function updateSubs() {
   try {
     const broadcaster_id = await getBroadcasterId();
@@ -43,17 +43,13 @@ async function updateSubs() {
     console.error('Error actualizando subs:', err.message);
   }
 }
-
 setInterval(updateSubs, 60_000);
 updateSubs();
 
-// Ruta raíz para capturar ?code=...
+// Ruta raíz para capturar code de Twitch
 app.get('/', async (req, res) => {
   const code = req.query.code;
-
-  if (!code) {
-    return res.sendFile(process.cwd() + '/frontend/index.html');
-  }
+  if (!code) return res.sendFile(process.cwd() + '/frontend/index.html');
 
   try {
     const tokenRes = await axios.post('https://id.twitch.tv/oauth2/token', null, {
@@ -73,5 +69,36 @@ app.get('/', async (req, res) => {
   }
 });
 
-// Archivos frontend
+// Endpoint de suscriptores directo (/subscribers)
+app.get('/subscribers', async (req, res) => {
+  try {
+    const clientId = req.query.clientId || process.env.TWITCH_CLIENT_ID;
+    const token = req.query.accessToken || process.env.TWITCH_TOKEN;
+    const channelName = req.query.channelName || 'tangov91';
+
+    // Obtener Channel ID
+    const userResponse = await axios.get(`https://api.twitch.tv/helix/users?login=${channelName}`, {
+      headers: {
+        'Client-ID': clientId,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const channelId = userResponse.data.data[0].id;
+
+    // Obtener suscriptores
+    const subsResponse = await axios.get(`https://api.twitch.tv/helix/subscriptions?broadcaster_id=${channelId}`, {
+      headers: {
+        'Client-ID': clientId,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    res.json({ total: subsResponse.data.total });
+  } catch (error) {
+    console.error('Error en /subscribers:', error.message);
+    res.status(500).json({ error: 'Error al obtener suscriptores' });
+  }
+});
+
+// Servir archivos frontend
 app.use(express.static('frontend'));
