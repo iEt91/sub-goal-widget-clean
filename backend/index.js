@@ -43,10 +43,11 @@ async function updateSubs() {
     console.error('Error actualizando subs:', err.message);
   }
 }
+
 setInterval(updateSubs, 60_000);
 updateSubs();
 
-// Ruta para recibir ?code=... si Twitch redirige a "/"
+// Ruta raíz para capturar ?code=...
 app.get('/', async (req, res) => {
   const code = req.query.code;
 
@@ -58,3 +59,19 @@ app.get('/', async (req, res) => {
     const tokenRes = await axios.post('https://id.twitch.tv/oauth2/token', null, {
       params: {
         client_id: process.env.CLIENT_ID,
+        client_secret: process.env.CLIENT_SECRET,
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: process.env.REDIRECT_URI
+      }
+    });
+
+    saveToken(tokenRes.data);
+    res.send('✅ Token guardado correctamente. Puedes cerrar esta ventana.');
+  } catch (err) {
+    res.status(500).send('❌ Error al intercambiar el código: ' + JSON.stringify(err.response?.data || err.message));
+  }
+});
+
+// Archivos frontend
+app.use(express.static('frontend'));
