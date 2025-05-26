@@ -1,22 +1,42 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
+import fs from 'fs';
 dotenv.config();
 
-let tokenData = null;
+const TOKEN_PATH = './backend/token.json';
 
-export async function getAccessToken() {
-  if (tokenData?.access_token) return tokenData.access_token;
+export function saveToken(data) {
+  fs.writeFileSync(TOKEN_PATH, JSON.stringify(data));
+}
 
+function loadToken() {
+  if (!fs.existsSync(TOKEN_PATH)) return null;
+  return JSON.parse(fs.readFileSync(TOKEN_PATH));
+}
+
+async function refreshToken(oldRefreshToken) {
   const res = await axios.post('https://id.twitch.tv/oauth2/token', null, {
     params: {
+      grant_type: 'refresh_token',
+      refresh_token: oldRefreshToken,
       client_id: process.env.CLIENT_ID,
-      client_secret: process.env.CLIENT_SECRET,
-      grant_type: 'client_credentials'
+      client_secret: process.env.CLIENT_SECRET
     }
   });
 
-  tokenData = res.data;
-  return tokenData.access_token;
+  saveToken(res.data);
+  return res.data.access_token;
+}
+
+export async function getAccessToken() {
+  const tokenData = loadToken();
+  if (!tokenData) throw new Error('No hay token almacenado. Autentica primero.');
+
+  try {
+    return tokenData.access_token;
+  } catch (err) {
+    return await refreshToken(tokenData.refresh_token);
+  }
 }
 
 export async function getSubscriberCount(broadcaster_id) {

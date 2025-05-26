@@ -1,44 +1,24 @@
-import express from 'express';
-import { WebSocketServer } from 'ws';
-import { getBroadcasterId, getSubscriberCount } from './twitch.js';
-import fs from 'fs';
-import dotenv from 'dotenv';
-dotenv.config();
+app.get('/', async (req, res) => {
+  const code = req.query.code;
 
-const app = express();
-const server = app.listen(process.env.PORT, () =>
-  console.log(`Servidor en puerto ${process.env.PORT}`)
-);
+  if (!code) {
+    return res.send('Falta el parámetro ?code en la URL');
+  }
 
-const wss = new WebSocketServer({ server });
+  try {
+    const tokenRes = await axios.post('https://id.twitch.tv/oauth2/token', null, {
+      params: {
+        client_id: process.env.CLIENT_ID,
+        client_secret: process.env.CLIENT_SECRET,
+        code,
+        grant_type: 'authorization_code',
+        redirect_uri: process.env.REDIRECT_URI
+      }
+    });
 
-let connections = [];
-
-wss.on('connection', (ws) => {
-  connections.push(ws);
-  sendCurrentState(ws);
-  ws.on('close', () => connections = connections.filter(conn => conn !== ws));
+    saveToken(tokenRes.data);
+    res.send('✅ Token guardado correctamente. Puedes cerrar esta ventana.');
+  } catch (err) {
+    res.status(500).send('❌ Error al intercambiar el código: ' + JSON.stringify(err.response?.data || err.message));
+  }
 });
-
-function broadcast(state) {
-  connections.forEach(ws => ws.send(JSON.stringify(state)));
-}
-
-function sendCurrentState(ws) {
-  const raw = fs.readFileSync('./backend/meta.json');
-  ws.send(raw);
-}
-
-async function updateSubs() {
-  const broadcaster_id = await getBroadcasterId();
-  const currentSubs = await getSubscriberCount(broadcaster_id);
-  const data = JSON.parse(fs.readFileSync('./backend/meta.json'));
-  data.current = currentSubs;
-  fs.writeFileSync('./backend/meta.json', JSON.stringify(data));
-  broadcast(data);
-}
-
-setInterval(updateSubs, 60_000); // actualiza cada 60 segundos
-updateSubs();
-
-app.use(express.static('frontend'));
