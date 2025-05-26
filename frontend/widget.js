@@ -2,7 +2,7 @@ const params = new URLSearchParams(window.location.search);
 
 const config = {
   token: params.get('token'),
-  goalAmount: parseInt(params.get('goal')) || 100
+  goalAmount: parseInt(params.get('meta')) || 100
 };
 
 const metaDiv = document.getElementById('meta');
