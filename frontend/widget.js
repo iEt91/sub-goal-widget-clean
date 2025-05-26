@@ -1,10 +1,7 @@
-// Leer parámetros desde la URL
 const params = new URLSearchParams(window.location.search);
 
 const config = {
-  clientId: params.get('clientId') || 'gp762nuuoqcoxypju8c569th9wz7q5',
-  accessToken: params.get('accessToken') || '6s1g5z1old5ku6t6i0xg68e6gabmk8',
-  channelName: params.get('channelName') || 'blackelespanolito',
+  token: params.get('token'),
   goalAmount: parseInt(params.get('goal')) || 100
 };
 
@@ -13,11 +10,11 @@ const progressDiv = document.getElementById('progress');
 
 async function fetchSubscribers() {
   try {
-    const url = `/subscribers?clientId=${config.clientId}&accessToken=${config.accessToken}&channelName=${config.channelName}`;
+    const url = `/subscribers?token=${config.token}`;
     const res = await fetch(url);
     const data = await res.json();
 
-    if (data.error || !data.total) throw new Error(data.error || 'Sin subs');
+    if (data.error || typeof data.total !== 'number') throw new Error(data.error || 'Subs inválidos');
 
     const current = data.total;
     const target = config.goalAmount;
