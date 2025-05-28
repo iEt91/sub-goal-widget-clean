@@ -10,7 +10,6 @@ const port = process.env.PORT || 3000;
 
 const clientId = 'gp762nuuoqcoxypju8c569th9wz7q5';
 const accessToken = '9t92yowa2wp0rdag05du4bi3dv95y9';
-
 const metaPath = './backend/meta.json';
 
 function loadMeta() {
@@ -58,14 +57,14 @@ app.get('/meta', (req, res) => {
   res.json(meta);
 });
 
-// Configuración del bot de chat con tmi.js
+// Configuración del bot de Twitch con tmi.js
 const client = new tmi.Client({
   connection: { reconnect: true },
   identity: {
     username: process.env.BOT_USERNAME,
-    password: `oauth:${process.env.BOT_OAUTH_TOKEN}`
+    password: process.env.BOT_OAUTH_TOKEN
   },
-  channels: ['tangov91'] // Canal de prueba
+  channels: ['blackelespanolito']
 });
 
 client.connect();
@@ -78,25 +77,25 @@ client.on('message', (channel, tags, message, self) => {
   const isBroadcaster = tags.badges?.broadcaster === '1';
   const authorized = isMod || isBroadcaster;
 
-  if (!authorized) return; // Ignorar si no es mod ni dueño del canal
+  if (!authorized) return;
 
   const meta = loadMeta();
 
-  // !meta2000 → cambia la meta numérica
+  // Cambiar meta numérica: !meta2000
   const numericMatch = message.match(/^!meta(\d{2,5})$/);
   if (numericMatch) {
     meta.target = parseInt(numericMatch[1]);
     saveMeta(meta);
-    console.log(`🎯 ${username} actualizó la meta a ${meta.target}`);
+    console.log(`🎯 ${username} actualizó la meta numérica a ${meta.target}`);
     return;
   }
 
-  // !meta abrir sobres → cambia el texto
+  // Cambiar texto de meta: !meta abrir sobres
   const textMatch = message.match(/^!meta (.+)$/i);
   if (textMatch) {
     meta.label = textMatch[1].trim();
     saveMeta(meta);
-    console.log(`📝 ${username} cambió el texto de meta a: "${meta.label}"`);
+    console.log(`📝 ${username} cambió el título de meta a: "${meta.label}"`);
   }
 });
 
