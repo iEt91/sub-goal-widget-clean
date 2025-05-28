@@ -3,21 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <title>Widget Meta de Subs</title>
-    <style>
+  <style>
     body {
       margin: 0;
       background: transparent;
       font-family: 'Bahnschrift', sans-serif;
       color: white;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: flex-start;   /* Alineación arriba */
+      justify-content: flex-start; /* Alineación izquierda */
       height: 100vh;
+      padding: 20px; /* Separación desde el borde */
       text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
     }
 
     #meta {
       font-size: 3rem;
+      text-align: left;
+      white-space: nowrap; /* Impide que salte de línea */
     }
   </style>
 </head>
