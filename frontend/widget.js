@@ -1,27 +1,24 @@
 const params = new URLSearchParams(window.location.search);
-
-const config = {
-  goalAmount: parseInt(params.get('meta')) || 100
-};
-
 const metaDiv = document.getElementById('meta');
 
-async function fetchSubscribers() {
+async function fetchMeta() {
   try {
-    const res = await fetch('/subscribers');
-    const data = await res.json();
+    const [subsRes, metaRes] = await Promise.all([
+      fetch('/subscribers'),
+      fetch('/meta')
+    ]);
 
-    if (data.error || typeof data.total !== 'number') throw new Error(data.error || 'Subs inválidos');
+    const subsData = await subsRes.json();
+    const metaData = await metaRes.json();
 
-    const current = data.total;
-    const target = config.goalAmount;
+    if (subsData.error || typeof subsData.total !== 'number') throw new Error(subsData.error || 'Subs inválidos');
 
-    metaDiv.textContent = `Subs: ${current} / ${target}`;
+    metaDiv.textContent = `${metaData.label}: ${subsData.total} / ${metaData.target}`;
   } catch (err) {
-    metaDiv.textContent = 'Error al cargar subs';
-    console.error('Error al cargar subs:', err);
+    metaDiv.textContent = 'Error al cargar meta';
+    console.error('Error al cargar meta:', err);
   }
 }
 
-setInterval(fetchSubscribers, 5000);
-fetchSubscribers();
+setInterval(fetchMeta, 5000);
+fetchMeta();
